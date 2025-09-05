@@ -1,7 +1,7 @@
 # Application definition
 
 
-
+import os
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     # third-party apps
     'rest_framework',
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -87,7 +89,19 @@ CHANNEL_LAYERS = {
 
 DEBUG = True
 
-ALLOWED_HOSTS=[]
+ALLOWED_HOSTS=["localhost", "127.0.0.1"]
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Default React dev server
+    "http://127.0.0.1:3000",  # Alternative React dev server
+]
+
+CORS_ALLOW_ALL_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
