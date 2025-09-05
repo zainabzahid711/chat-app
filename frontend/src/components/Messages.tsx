@@ -86,12 +86,12 @@ export default function Messages({
     };
 
     ws.onerror = (error) => {
-      console.error(
-        "WebSocket error:" +
-          JSON.stringify(error) +
-          "readyState:" +
-          ws.readyState
-      );
+      // console.error(
+      //   "WebSocket error:" +
+      //     JSON.stringify(error) +
+      //     "readyState:" +
+      //     ws.readyState
+      // );
 
       // Check actual connection state before showing error
       if (ws.readyState === WebSocket.CLOSED) {
