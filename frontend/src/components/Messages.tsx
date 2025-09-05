@@ -32,7 +32,6 @@ export default function Messages({
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        // Adjust this URL based on your actual API endpoint
         const res = await fetch(
           `http://127.0.0.1:8000/api/messages/?room=${roomId}`
         );
@@ -53,26 +52,51 @@ export default function Messages({
     fetchMessages();
   }, [roomId]);
 
-  // Setup WebSocket connection
+  // Setup WebSocket connection - ONLY THIS ONE SHOULD EXIST
   useEffect(() => {
-    // Adjust the WebSocket URL to match your Django Channels setup
     const ws = new WebSocket(`ws://127.0.0.1:8000/ws/chat/${roomId}/`);
     wsRef.current = ws;
 
+    // Add debug logging
+    console.log("WebSocket created, readyState:", ws.readyState);
+
     ws.onopen = () => {
-      console.log("WebSocket connection established");
+      console.log(
+        "WebSocket connection established, readyState:",
+        ws.readyState
+      );
       setError("");
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      setMessages((prev) => [...prev, data]);
+
+      if (data.message) {
+        const tempMessage = {
+          id: Date.now(),
+          user: data.user || "Unknown",
+          content: data.message,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, tempMessage]);
+      } else {
+        setMessages((prev) => [...prev, data]);
+      }
       scrollToBottom();
     };
 
     ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-      setError("Connection error. Please refresh the page.");
+      console.error(
+        "WebSocket error:" +
+          JSON.stringify(error) +
+          "readyState:" +
+          ws.readyState
+      );
+
+      // Check actual connection state before showing error
+      if (ws.readyState === WebSocket.CLOSED) {
+        setError("Connection error. Please refresh the page.");
+      }
     };
 
     ws.onclose = () => {
@@ -95,7 +119,17 @@ export default function Messages({
     };
 
     try {
-      // Send via REST API to persist
+      // Send via WebSocket first for real-time
+      if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+        wsRef.current.send(
+          JSON.stringify({
+            message: newMessage.trim(),
+            user: userId,
+          })
+        );
+      }
+
+      // Also send via REST API to persist
       const res = await fetch("http://127.0.0.1:8000/api/messages/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -103,7 +137,6 @@ export default function Messages({
       });
 
       if (res.ok) {
-        // The WebSocket will receive the new message from the server
         setNewMessage("");
         setError("");
       } else {

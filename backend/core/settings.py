@@ -12,6 +12,8 @@ SECRET_KEY = "^o_4z9rx1v6qo8jz_fr*r%if^-&v9_)0(@!&f((4sdlhv#d#+e"
 
 
 INSTALLED_APPS = [
+    'channels',
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -22,7 +24,6 @@ INSTALLED_APPS = [
 
     # third-party apps
     'rest_framework',
-    'channels',
 
     # local apps
     'chat',   # we’ll create this app in the next step
@@ -78,8 +79,6 @@ DATABASES = {
     }
 }
 
-# Channels config (needed later for WebSockets)
-ASGI_APPLICATION = "core.asgi.application"
 
 CHANNEL_LAYERS = {
     "default": {
@@ -105,3 +104,15 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
+
+
+
+# Channels config (needed later for WebSockets)
+ASGI_APPLICATION = "core.asgi.application"
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
